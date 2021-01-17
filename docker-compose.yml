@@ -1,0 +1,40 @@
+version: "3.7"
+services: 
+  nginx:
+    restart: always
+    image: nginx:1.19.6-alpine
+    container_name: nginx
+    depends_on:
+      - php8
+    volumes: 
+      - ./www:/var/www:rw
+      - ./services/nginx/conf.d:/etc/nginx/conf.d:rw
+      - ./services/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./logs/nginx:/var/log/nginx:rw
+    ports:
+      - "80:80"
+    environment:
+      TZ: Asia/Shanghai
+    networks: 
+      - default
+    command: [nginx-debug, '-g', 'daemon off;']
+  php8:
+    restart: always
+    image: php:8.0.1-fpm-alpine
+    container_name: php8
+    volumes: 
+      - ./www:/var/www:rw
+      - ./services/php8/php.ini:/usr/local/etc/php/php.ini:ro
+      - ./logs/php:/var/log/php:rw
+    expose: 
+      - 9000
+    environment: 
+      TZ: Asia/Shanghai
+    networks:
+      - default
+    cap_add:
+      - SYS_PTRACE
+ 
+networks: 
+  default:
+    driver: bridge
