@@ -20,14 +20,24 @@ services:
     command: [nginx-debug, '-g', 'daemon off;']
   php8:
     restart: always
-    image: php:8.0.1-fpm-alpine
+    depends_on: 
+      - mysql
+      - redis
+    build:                           # 构建自定义镜像
+      context: ./services/php8/      # 指定Dockerfile文件所在路径
+      dockerfile: Dockerfile         # 指定Dockerfile文件名称
+    image: php-fpm-8.0.1
     container_name: php8
+    tty: true
     volumes: 
       - ./www:/var/www:rw
       - ./services/php8/php.ini:/usr/local/etc/php/php.ini:ro
       - ./logs/php:/var/log/php:rw
     expose: 
       - 9000
+    links:
+      - mysql
+      - redis
     environment: 
       TZ: Asia/Shanghai
     networks:
@@ -48,6 +58,21 @@ services:
       - ./data/mysql:/var/lib/mysql:rw
       - ./logs/mysql:/var/log/mysql:rw
     command: --default-authentication-plugin=mysql_native_password
+    networks: 
+      - default
+  redis:
+    restart: always
+    image: redis:5.0.10
+    container_name: redis
+    ports: 
+      - "6379:6379"
+    volumes: 
+      - ./services/redis/redis.conf:/usr/local/etc/redis.conf:ro
+      - ./data/redis:/data:rw
+      - ./logs/redis:/var/log/redis:rw
+    command: redis-server --requirepass 123456
+    environment:
+      TZ: Asia/Shanghai
     networks: 
       - default
  
