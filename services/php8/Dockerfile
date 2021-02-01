@@ -26,11 +26,12 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
 
 # Git
-RUN git config --global user.name "${GIT_NAME}"
-RUN git config --global user.email "${GIT_EMAIL}"
+RUN git config --global user.name "${GIT_NAME}" && \
+    git config --global user.email "${GIT_EMAIL}"
 
 # 工作目录 
 WORKDIR /var/www
 
 # 权限设置
-RUN usermod -u 1000 www-data
+RUN usermod -u 1000 www-data 
+RUN chown -R www-data:www-data /var/www
